@@ -1382,7 +1382,17 @@ async function submitApply(){
   var facilityValue=document.getElementById('inp_facility')?document.getElementById('inp_facility').value:'';
   var addrBase=document.getElementById('inp_addr')?document.getElementById('inp_addr').value.trim():'';
   var addrDetail=document.getElementById('inp_addr_detail')?document.getElementById('inp_addr_detail').value.trim():'';
+  var puEl=document.getElementById('power-unit');
+  var powerUnit=cfg.unit||(puEl?puEl.textContent:'kW');
+
+  /* 접수번호 클라이언트에서 생성 */
+  var now=new Date();
+  var refNum='DR-'+now.getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  var timestamp=now.toLocaleString('ko-KR');
+
   var payload={
+    refNum:refNum,
+    timestamp:timestamp,
     drType:state.drType||'',
     drTypeName:cfg.name||'',
     applicantName:document.getElementById('inp_name')?document.getElementById('inp_name').value.trim():'',
@@ -1392,7 +1402,7 @@ async function submitApply(){
     address:addrBase,
     addressDetail:addrDetail,
     powerValue:document.getElementById('inp_power')?document.getElementById('inp_power').value:'',
-    powerUnit:cfg.unit||document.getElementById('power-unit')?document.getElementById('power-unit').textContent:'kW',
+    powerUnit:powerUnit,
     meterOwned:state.meterHas==='yes'?'보유':'미보유',
     facilityType:facilityValue,
     facilityTypeName:facilityLabels[facilityValue]||''
@@ -1401,30 +1411,28 @@ async function submitApply(){
   if(!payload.drType){alert('DR 유형을 선택해주세요.');return;}
   if(!payload.applicantName||!payload.bizNo||!payload.phone){alert('필수 항목을 모두 입력해주세요.');return;}
 
-  /* 2. 버튼 로딩 상태 */
+  /* 2. 버튼 로딩 */
   if(btn){btn.disabled=true;btn.textContent='접수 중...';}
 
+  /* 3. GAS 직접 전송 (no-cors → 응답 못 읽지만 전송은 됨) */
+  var GAS_URL='https://script.google.com/macros/s/AKfycbz4W7tSb2VfE5j3__Kzy-XpSSIuTiQWs8SwGA27kziKdzIGzACgvZiWL_ppRs8eQxPp/exec';
+
   try{
-    var res=await fetch('/api/submit',{
+    await fetch(GAS_URL,{
       method:'POST',
+      mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(payload)
     });
-    var result=await res.json();
+    /* no-cors 모드에서는 응답을 읽을 수 없으므로 전송 성공으로 간주 */
 
-    if(!result.ok){
-      throw new Error(result.message||'접수 처리 중 오류가 발생했습니다.');
-    }
-
-    /* 3. 성공 처리 */
-    state.refNum=result.refNum||'DR-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+    /* 4. 성공 처리 */
+    state.refNum=refNum;
     state.applied=true;
 
-    /* 접수번호 표기 */
     var rn=document.getElementById('done-ref-num');
     if(rn) rn.textContent=state.refNum;
 
-    /* 신청 탭 뱃지 */
     var navApply=document.getElementById('nav-apply');
     if(navApply&&!navApply.querySelector('.nav-badge')){
       var badge=document.createElement('div');
@@ -1434,7 +1442,6 @@ async function submitApply(){
       navApply.appendChild(badge);
     }
 
-    /* 신청현황 화면 데이터 */
     document.querySelectorAll('.status-ref-num').forEach(function(el){el.textContent=state.refNum;});
     var statusType=document.getElementById('status-dr-type');
     var statusName=document.getElementById('status-dr-name');
@@ -1442,8 +1449,7 @@ async function submitApply(){
     if(statusName) statusName.textContent=cfg.name+' DR 신청';
     var statusPower=document.getElementById('status-power');
     var pi=document.getElementById('inp_power');
-    var pu=document.getElementById('power-unit');
-    if(statusPower&&pi&&pu) statusPower.textContent=pi.value+' '+(pu.textContent||'kW');
+    if(statusPower&&pi) statusPower.textContent=pi.value+' '+powerUnit;
 
     showStep('done');
     showScreen('screen-done');
@@ -1451,7 +1457,7 @@ async function submitApply(){
 
   }catch(err){
     console.error('submitApply error:',err);
-    alert(err.message||'신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    alert('신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     if(btn){btn.disabled=!state.agreed;btn.textContent=originalText;}
   }
 }
