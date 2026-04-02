@@ -1050,37 +1050,6 @@ var drConfig={
 var facilityLabels={'lighting':'조명설비','hvac':'냉난방설비(HVAC)','motor':'모터/펌프','industrial':'산업용 설비','ess':'에너지저장장치(ESS)','ev':'전기차 충전기','other':'기타'};
 var allDrIds=['drc_a','drc_b','drc_c','drc_d','drc_e','drc_f'];
 
-const API_URL= '/api/submit';
-
-function collectApplicationData(){
-  var cfg=drConfig[state.drType]||{name:'',unit:''};
-  var facilityValue=document.getElementById('inp_facility')?.value||'';
-  var addrBase=document.getElementById('inp_addr')?.value.trim()||'';
-  var addrDetail=document.getElementById('inp_addr_detail')?.value.trim()||'';
-
-  return {
-    drType: state.drType||'',
-    drTypeName: cfg.name||'',
-    applicantName: document.getElementById('inp_name')?.value.trim()||'',
-    bizNo: document.getElementById('inp_biz')?.value.trim()||'',
-    phone: document.getElementById('inp_tel')?.value.trim()||'',
-    email: document.getElementById('inp_email')?.value.trim()||'',
-    address: addrBase,
-    addressDetail: addrDetail,
-    powerValue: document.getElementById('inp_power')?.value||'',
-    powerUnit: cfg.unit||document.getElementById('power-unit')?.textContent||'kW',
-    meterOwned: state.meterHas==='yes'?'보유':'미보유',
-    facilityType: facilityValue,
-    facilityTypeName: facilityLabels[facilityValue]||''
-  };
-}
-
-function renderDoneRefNum(refNum){
-  var rn=document.getElementById('done-ref-num');
-  if(rn) rn.textContent=refNum;
-}
-
-
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   var el=document.getElementById(id);
@@ -1395,59 +1364,67 @@ function toggleAgree(){
 
 async function submitApply(){
   var btn=document.getElementById('btn-submit');
-  var originalText=btn?btn.textContent:'';
+  var originalText=btn?btn.textContent:'신청 완료하기';
+
+  /* 1. 데이터 수집 */
+  var cfg=drConfig[state.drType]||{name:'',unit:''};
+  var facilityValue=document.getElementById('inp_facility')?document.getElementById('inp_facility').value:'';
+  var addrBase=document.getElementById('inp_addr')?document.getElementById('inp_addr').value.trim():'';
+  var addrDetail=document.getElementById('inp_addr_detail')?document.getElementById('inp_addr_detail').value.trim():'';
+  var payload={
+    drType:state.drType||'',
+    drTypeName:cfg.name||'',
+    applicantName:document.getElementById('inp_name')?document.getElementById('inp_name').value.trim():'',
+    bizNo:document.getElementById('inp_biz')?document.getElementById('inp_biz').value.trim():'',
+    phone:document.getElementById('inp_tel')?document.getElementById('inp_tel').value.trim():'',
+    email:document.getElementById('inp_email')?document.getElementById('inp_email').value.trim():'',
+    address:addrBase,
+    addressDetail:addrDetail,
+    powerValue:document.getElementById('inp_power')?document.getElementById('inp_power').value:'',
+    powerUnit:cfg.unit||document.getElementById('power-unit')?document.getElementById('power-unit').textContent:'kW',
+    meterOwned:state.meterHas==='yes'?'보유':'미보유',
+    facilityType:facilityValue,
+    facilityTypeName:facilityLabels[facilityValue]||''
+  };
+
+  if(!payload.drType){alert('DR 유형을 선택해주세요.');return;}
+  if(!payload.applicantName||!payload.bizNo||!payload.phone){alert('필수 항목을 모두 입력해주세요.');return;}
+
+  /* 2. 버튼 로딩 상태 */
+  if(btn){btn.disabled=true;btn.textContent='접수 중...';}
 
   try{
-    var payload=collectApplicationData();
-
-    if(!payload.drType){
-      alert('DR 유형을 선택해주세요.');
-      return;
-    }
-    if(!payload.applicantName||!payload.bizNo||!payload.phone){
-      alert('필수값을 입력해주세요.');
-      return;
-    }
-
-    if(btn){
-      btn.disabled=true;
-      btn.textContent='접수 중...';
-    }
-
-    var res=await fetch(API_URL,{
+    var res=await fetch('/api/submit',{
       method:'POST',
-      headers:{
-        'Content-Type':'text/plain;charset=utf-8'
-      },
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(payload)
     });
-
     var result=await res.json();
 
     if(!result.ok){
       throw new Error(result.message||'접수 처리 중 오류가 발생했습니다.');
     }
 
-    state.refNum=result.refNum||'-';
+    /* 3. 성공 처리 */
+    state.refNum=result.refNum||'DR-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
     state.applied=true;
 
-    renderDoneRefNum(state.refNum);
+    /* 접수번호 표기 */
+    var rn=document.getElementById('done-ref-num');
+    if(rn) rn.textContent=state.refNum;
 
+    /* 신청 탭 뱃지 */
     var navApply=document.getElementById('nav-apply');
-    if(navApply){
-      var existing=navApply.querySelector('.nav-badge');
-      if(!existing){
-        var badge=document.createElement('div');
-        badge.className='nav-badge';
-        badge.style.cssText='position:absolute;top:6px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:#F04452;border:2px solid #fff;';
-        navApply.style.position='relative';
-        navApply.appendChild(badge);
-      }
+    if(navApply&&!navApply.querySelector('.nav-badge')){
+      var badge=document.createElement('div');
+      badge.className='nav-badge';
+      badge.style.cssText='position:absolute;top:6px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:#F04452;border:2px solid #fff;';
+      navApply.style.position='relative';
+      navApply.appendChild(badge);
     }
 
-    var refEls=document.querySelectorAll('.status-ref-num');
-    refEls.forEach(function(el){el.textContent=state.refNum;});
-    var cfg=drConfig[state.drType]||{name:''};
+    /* 신청현황 화면 데이터 */
+    document.querySelectorAll('.status-ref-num').forEach(function(el){el.textContent=state.refNum;});
     var statusType=document.getElementById('status-dr-type');
     var statusName=document.getElementById('status-dr-name');
     if(statusType) statusType.textContent=cfg.name;
@@ -1455,22 +1432,18 @@ async function submitApply(){
     var statusPower=document.getElementById('status-power');
     var pi=document.getElementById('inp_power');
     var pu=document.getElementById('power-unit');
-    if(statusPower&&pi&&pu) statusPower.textContent=pi.value+' '+pu.textContent;
+    if(statusPower&&pi&&pu) statusPower.textContent=pi.value+' '+(pu.textContent||'kW');
 
     showStep('done');
     showScreen('screen-done');
     setNav('nav-apply');
+
   }catch(err){
-    console.error(err);
-    alert(err.message||'신청 중 오류가 발생했습니다.');
-  }finally{
-    if(btn){
-      btn.disabled=!state.agreed;
-      btn.textContent=originalText||'신청 완료하기';
-    }
+    console.error('submitApply error:',err);
+    alert(err.message||'신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    if(btn){btn.disabled=!state.agreed;btn.textContent=originalText;}
   }
 }
-
 function openModal(id){var el=document.getElementById(id);if(el)el.classList.add('show');}
 function closeModal(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 
