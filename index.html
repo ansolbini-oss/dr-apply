@@ -1050,7 +1050,7 @@ var drConfig={
 var facilityLabels={'lighting':'조명설비','hvac':'냉난방설비(HVAC)','motor':'모터/펌프','industrial':'산업용 설비','ess':'에너지저장장치(ESS)','ev':'전기차 충전기','other':'기타'};
 var allDrIds=['drc_a','drc_b','drc_c','drc_d','drc_e','drc_f'];
 
-const API_URL='https://script.google.com/macros/s/AKfycbz4W7tSb2VfE5j3__Kzy-XpSSIuTiQWs8SwGA27kziKdzIGzACgvZiWL_ppRs8eQxPp/exec';
+const API_URL= '/api/submit';
 
 function collectApplicationData(){
   var cfg=drConfig[state.drType]||{name:'',unit:''};
