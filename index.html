@@ -1415,7 +1415,7 @@ async function submitApply(){
   if(btn){btn.disabled=true;btn.textContent='접수 중...';}
 
   /* 3. GAS 직접 전송 (no-cors → 응답 못 읽지만 전송은 됨) */
-  var GAS_URL='https://script.google.com/macros/s/AKfycbz4W7tSb2VfE5j3__Kzy-XpSSIuTiQWs8SwGA27kziKdzIGzACgvZiWL_ppRs8eQxPp/exec';
+  var GAS_URL='https://script.google.com/macros/s/AKfycbyF0XE15bJnxdzmYhZSUtJ_kiUV8Wc_QbWbJ5ryEvUWfhoMjZz9vCdks3-ScYU1AFvD/exec';
 
   try{
     await fetch(GAS_URL,{
