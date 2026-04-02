@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DR 수요반응 사업 신청</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --blue:#0064FF;--blue-light:#E8F1FF;--blue-dark:#0050CC;
+    --text-primary:#191F28;--text-secondary:#6B7684;--text-tertiary:#ADB5BD;
+    --bg:#F2F4F7;--bg-white:#FFFFFF;--bg-card:#FFFFFF;
+    --border:#E5E8EB;--border-focus:#0064FF;
+    --success:#00C896;--warning:#FF9F0A;--danger:#F04452;
+    --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;
+    --font:'Noto Sans KR',sans-serif;
+  }
+  body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font-size:15px;line-height:1.5;overscroll-behavior:none;}
+  #app{max-width:420px;margin:0 auto;background:var(--bg);min-height:100vh;position:relative;display:flex;flex-direction:column;}
+  
+  .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;background:var(--bg-white);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);}
+  .header-back{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:background .15s;}
+  .header-back:hover{background:var(--bg);}
+  .header-title{font-size:17px;font-weight:700;color:var(--text-primary);}
+  .header-right{width:40px;}
+
+  .content{flex:1;overflow-y:auto;padding-bottom:80px;}
+
+  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--bg-white);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);z-index:200;padding-bottom:env(safe-area-inset-bottom,0);}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;cursor:pointer;transition:all .15s;}
+  .nav-item svg{width:22px;height:22px;color:var(--text-tertiary);transition:color .15s;}
+  .nav-item span{font-size:11px;font-weight:500;color:var(--text-tertiary);transition:color .15s;}
+  .nav-item.active svg{color:var(--blue);}
+  .nav-item.active span{color:var(--blue);}
+
+  .card{background:var(--bg-white);border-radius:var(--radius-lg);padding:20px;margin:0 16px 12px;}
+  .card-section{margin-bottom:24px;}
+  .section-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:.5px;margin-bottom:12px;padding:0 4px;}
+
+  .btn{width:100%;height:52px;border:none;border-radius:var(--radius-md);font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{background:#ADB5BD;cursor:not-allowed;transform:none;}
+  .btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
+  .btn-outline:hover{background:var(--blue-light);}
+  .btn-ghost{background:var(--bg);color:var(--text-secondary);border:none;}
+  .btn-ghost:hover{background:#E5E8EB;}
+  .btn-sm{height:40px;font-size:14px;border-radius:var(--radius-sm);}
+
+  .input-group{margin-bottom:16px;}
+  .input-label{font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;}
+  .input-wrap{position:relative;}
+  .input{width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:0 16px;font-family:var(--font);font-size:15px;color:var(--text-primary);background:#fff;outline:none;transition:border-color .2s;}
+  .input:focus{border-color:var(--border-focus);}
+  .input::placeholder{color:var(--text-tertiary);}
+  .input.valid{border-color:#00C896;padding-right:42px;}
+  .input.invalid{border-color:var(--danger);padding-right:42px;}
+  .input-unit{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:600;color:var(--text-secondary);}
+  .field-icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);width:20px;height:20px;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:14px;}
+  .field-msg{font-size:12px;margin-top:5px;padding-left:2px;min-height:18px;line-height:1.4;}
+  .field-msg.err{color:var(--danger);}
+  .field-msg.ok{color:#00885A;}
+  .select{width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:0 16px;font-family:var(--font);font-size:15px;color:var(--text-primary);background:#fff;outline:none;transition:border-color .15s;appearance:none;cursor:pointer;}
+  .select:focus{border-color:var(--border-focus);}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--text-secondary);pointer-events:none;}
+
+  .radio-group{display:flex;flex-direction:column;gap:8px;}
+  .radio-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;background:#fff;}
+  .radio-item:hover{border-color:var(--blue);background:var(--blue-light);}
+  .radio-item.selected{border-color:var(--blue);background:var(--blue-light);}
+  .radio-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .radio-item.selected .radio-dot{border-color:var(--blue);background:var(--blue);}
+  .radio-item.selected .radio-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;}
+  .radio-text{flex:1;}
+  .radio-label{font-size:15px;font-weight:600;color:var(--text-primary);}
+  .radio-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+
+  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+  .badge-blue{background:var(--blue-light);color:var(--blue);}
+  .badge-green{background:#E6FAF4;color:#00885A;}
+  .badge-orange{background:#FFF3E0;color:#BF6900;}
+  .badge-gray{background:#F2F4F7;color:var(--text-secondary);}
+  .badge-red{background:#FFEAEA;color:var(--danger);}
+
+  .alert{padding:14px 16px;border-radius:var(--radius-md);font-size:13px;line-height:1.6;margin-top:12px;}
+  .alert-info{background:#E8F1FF;color:#0050CC;}
+  .alert-warning{background:#FFF3E0;color:#BF6900;}
+  .alert-success{background:#E6FAF4;color:#00885A;}
+  .alert-danger{background:#FFEAEA;color:#C0323B;}
+
+  .list-item{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border);}
+  .list-item:last-child{border-bottom:none;}
+  .list-label{font-size:14px;color:var(--text-secondary);}
+  .list-value{font-size:14px;font-weight:600;color:var(--text-primary);}
+
+  .step-bar{display:flex;gap:4px;padding:16px 20px 0;}
+  .step-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;}
+  .step-dot.done{background:var(--blue);}
+  .step-dot.active{background:var(--blue);}
+
+  .hero{background:linear-gradient(145deg,#1A6FFF 0%,#3D8EFF 60%,#5BA3FF 100%);padding:44px 24px 40px;color:#fff;margin-bottom:0;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);top:-60px;right:-40px;}
+  .hero::after{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.07);bottom:-40px;left:-20px;}
+  .hero-greeting{font-size:13px;opacity:.8;margin-bottom:6px;}
+  .hero-title{font-size:22px;font-weight:700;line-height:1.35;}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;margin-top:14px;}
+
+
+  .status-card{background:#fff;border-radius:var(--radius-lg);padding:20px;margin:0 16px 12px;border-left:4px solid var(--blue);}
+
+  .profile-header{background:var(--blue);padding:28px 20px 32px;color:#fff;}
+  .profile-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin-bottom:12px;}
+  .profile-name{font-size:20px;font-weight:700;}
+  .profile-status{font-size:13px;opacity:.8;margin-top:4px;}
+  .menu-list{background:#fff;margin:0 16px 12px;border-radius:var(--radius-lg);overflow:hidden;}
+  .menu-item{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);}
+  .menu-item:last-child{border-bottom:none;}
+  .menu-item:hover{background:var(--bg);}
+  .menu-item:active{background:var(--border);}
+  .menu-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .menu-icon svg{width:18px;height:18px;}
+  .menu-text{flex:1;font-size:15px;font-weight:500;}
+  .menu-arrow{color:var(--text-tertiary);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .modal-overlay.show{opacity:1;pointer-events:all;}
+  .modal{background:#fff;width:100%;max-width:420px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:8px 20px 32px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+  .modal-overlay.show .modal{transform:translateY(0);}
+  .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 20px;}
+  .modal-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+  .modal-sub{font-size:14px;color:var(--text-secondary);margin-bottom:20px;}
+
+  .success-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
+  .success-icon{width:72px;height:72px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+  .success-icon svg{width:36px;height:36px;stroke:var(--blue);}
+  .success-title{font-size:22px;font-weight:700;margin-bottom:8px;}
+  .success-desc{font-size:14px;color:var(--text-secondary);line-height:1.7;}
+
+  .info-section{padding:20px;}
+  .info-title{font-size:20px;font-weight:700;margin-bottom:8px;}
+  .info-desc{font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px;}
+  .info-card{background:#fff;border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;border:1px solid var(--border);}
+  .info-card-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .info-card-desc{font-size:13px;color:var(--text-secondary);line-height:1.6;}
+
+  .status-timeline{padding:0 4px;}
+  .timeline-item{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+  .timeline-item:not(:last-child)::before{content:'';position:absolute;left:17px;top:36px;bottom:0;width:2px;background:var(--border);}
+  .timeline-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .timeline-dot.done{background:var(--blue);color:#fff;}
+  .timeline-dot.active{background:var(--blue-light);color:var(--blue);border:2px solid var(--blue);}
+  .timeline-dot.pending{background:var(--bg);color:var(--text-tertiary);border:2px solid var(--border);}
+  .timeline-content{flex:1;padding-top:8px;}
+  .timeline-title{font-size:14px;font-weight:700;}
+  .timeline-date{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+
+  .toggle{width:48px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--blue);}
+  .toggle::after{content:'';width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .toggle.on::after{transform:translateX(22px);}
+
+  .screen{display:none;flex-direction:column;min-height:calc(100vh - 64px);}
+  .screen.active{display:flex;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .animate{animation:fadeUp .25s ease both;}
+  .animate-d1{animation-delay:.05s;}
+  .animate-d2{animation-delay:.1s;}
+  .animate-d3{animation-delay:.15s;}
+  .animate-d4{animation-delay:.2s;}
+
+  ::-webkit-scrollbar{width:0;}
+
+  .dr-tag{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-right:6px;margin-bottom:6px;}
+  .dr-type-a{background:#E8F1FF;color:#0064FF;}
+  .dr-type-b{background:#E6FAF4;color:#00885A;}
+  .dr-type-c{background:#FFF3E0;color:#BF6900;}
+
+  .divider{height:8px;background:var(--bg);margin:0 -20px;}
+
+  input[type=number]{-moz-appearance:textfield;}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="content" id="mainContent">
+
+    <!-- ════════ 홈 ════════ -->
+    <div class="screen active" id="screen-home">
+
+      <!-- 히어로 배너 -->
+      <div class="hero animate">
+        <h1 class="hero-title" style="font-size:26px;font-weight:800;text-align:center;line-height:1.3;">전력 절감으로<br>안정적인 수익을 만드세요</h1>
+        <p style="font-size:14px;opacity:.85;text-align:center;margin-top:12px;line-height:1.6;">식스티헤르츠는 정확한 데이터 수집으로<br>안정적인 인센티브를 제공합니다.</p>
+      </div>
+
+      <!-- 혜택 카드 -->
+      <div style="padding:16px 16px 0;" class="animate animate-d1">
+        <div style="background:#fff;border-radius:var(--radius-lg);padding:8px 20px;border:1px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);">
+            <div style="width:52px;height:52px;border-radius:12px;background:#F2F4F7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px;">🔌</div>
+            <div>
+              <p style="font-size:15px;font-weight:700;color:var(--text-primary);">별도 설비 없이 간편하게 참여</p>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">기존 설비 그대로 DR 참여 가능</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);">
+            <div style="width:52px;height:52px;border-radius:12px;background:#EDF7F2;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px;">⚙️</div>
+            <div>
+              <p style="font-size:15px;font-weight:700;color:var(--text-primary);">운영 영향 없이 선택적 감축</p>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">업무 흐름을 유지하며 유연하게 조절</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:16px 0;">
+            <div style="width:52px;height:52px;border-radius:12px;background:#FFF8E7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px;">🤝</div>
+            <div>
+              <p style="font-size:15px;font-weight:700;color:var(--text-primary);">식스티헤르츠가 참여부터 정산까지 지원</p>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">전담 매니저가 처음부터 끝까지 함께</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 지금 신청하면 -->
+      <div style="padding:12px 16px 0;" class="animate animate-d2">
+        <div style="background:#EEF3FF;border-radius:var(--radius-lg);padding:18px 20px;border:1px solid #C7D9FF;">
+          <p style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:14px;">📣 지금 신청하면</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p style="font-size:15px;font-weight:600;color:var(--text-primary);">사전 검토 결과 즉시 확인</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p style="font-size:15px;font-weight:600;color:var(--text-primary);">전담 매니저 배정 (3영업일 내)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 신청하기 버튼 -->
+      <div style="padding:16px 16px 8px;" class="animate animate-d3">
+        <button class="btn btn-primary" style="height:56px;font-size:17px;border-radius:var(--radius-lg);" onclick="goApply()">
+          신청 시작하기 →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ════════ 신청 플로우 ════════ -->
+    <div class="screen" id="screen-apply">
+      <!-- STEP 0 -->
+      <div id="step0" class="animate">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+          <div onclick="showScreen('screen-home')" style="width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:26px;height:26px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:var(--text-primary);">식스티헤르츠</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--blue);">신청 접수</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border);gap:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">1</div>
+            <span style="font-size:12px;font-weight:700;color:var(--blue);">유형</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">2</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">기본</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">3</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">사업장</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">4</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">전력</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">5</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">확인</span>
+          </div>
+        </div>
+        <div style="padding:8px 16px;">
+          <p style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;padding-left:2px;">| DR 프로그램 선택</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+
+            <div class="dr-card" id="drc_a" onclick="selectDR('DR-A')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#F2F4F7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">🇰🇷</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">국민 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">3~30kW · 저압 포함 · 소규모 전국민 참여</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+            <div class="dr-card" id="drc_b" onclick="selectDR('DR-B')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#E8F1FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">⚡</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">표준 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">100kW 이상 · 일반 사업자</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+            <div class="dr-card" id="drc_c" onclick="selectDR('DR-C')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#FFF0F0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">🏭</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">중소형 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">10~100kW · 중소기업·소상공인</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+            <div class="dr-card" id="drc_d" onclick="selectDR('DR-D')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#E8FFF5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">🌊</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">제주 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">50kW 이상 · 제주도 소재 사업장</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+            <div class="dr-card" id="drc_e" onclick="selectDR('DR-E')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#F5F0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">🔄</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">주파수 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">500kW 이상 · 자동 응동형</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+            <div class="dr-card" id="drc_f" onclick="selectDR('DR-F')" style="display:flex;align-items:center;gap:14px;padding:16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#FFF8E1;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">➕</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:var(--text-primary);">플러스 DR</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">200kW+ · 표준DR 1년↑ 고성과 참여자</p>
+              </div>
+              <div class="dr-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></div>
+            </div>
+
+          </div>
+          <div id="dr-info-box" class="alert alert-info" style="display:none;margin-top:12px;"></div>
+        </div>
+        <div style="padding:12px 16px 8px;">
+          <button class="btn btn-primary" id="btn-step0" onclick="goStep(1)" disabled>다음으로</button>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step1" class="animate" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+          <div onclick="goStep(0)" style="width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:26px;height:26px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:var(--text-primary);">식스티헤르츠</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--blue);">신청 접수</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border);gap:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">유형</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">2</div>
+            <span style="font-size:12px;font-weight:700;color:var(--blue);">기본</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">3</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">사업장</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">4</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">전력</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">5</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">확인</span>
+          </div>
+        </div>
+        <div style="padding:14px 16px 0;">
+          <p style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;padding-left:2px;">| 신청자 정보</p>
+          <div class="card" style="margin:0 0 12px;">
+
+            <!-- 사업자명 -->
+            <div class="input-group">
+              <label class="input-label">사업자명 (또는 성명)</label>
+              <div class="input-wrap">
+                <input class="input" type="text" id="inp_name" placeholder="예) 홍길동 / ㈜한국에너지" oninput="validateField('name')">
+                <span class="field-icon" id="icon_name"></span>
+              </div>
+              <p class="field-msg" id="msg_name"></p>
+            </div>
+
+            <!-- 사업자등록번호 + 조회 버튼 -->
+            <div class="input-group">
+              <label class="input-label">사업자등록번호</label>
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <div class="input-wrap" style="flex:1;">
+                  <input class="input" type="text" id="inp_biz" placeholder="000-00-00000" maxlength="12" oninput="formatBizNum(this);validateField('biz')">
+                  <span class="field-icon" id="icon_biz"></span>
+                </div>
+                <button id="btn-biz-check" onclick="checkBizNum()" style="height:52px;padding:0 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;" disabled>조회</button>
+              </div>
+              <p class="field-msg" id="msg_biz"></p>
+              <!-- 조회 결과 박스 -->
+              <div id="biz-result" style="display:none;margin-top:10px;padding:12px 14px;border-radius:var(--radius-md);background:#E8F1FF;border:1px solid #C7D9FF;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <p style="font-size:13px;font-weight:700;color:var(--blue);">사업자 조회 완료</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;padding-left:28px;">
+                  <p style="font-size:13px;color:var(--text-primary);font-weight:600;" id="biz-result-name"></p>
+                  <p style="font-size:12px;color:var(--text-secondary);" id="biz-result-status"></p>
+                </div>
+              </div>
+              <div id="biz-error" style="display:none;margin-top:10px;padding:12px 14px;border-radius:var(--radius-md);background:#FFEAEA;border:1px solid #FFCACA;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:20px;height:20px;border-radius:50%;background:#F04452;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </div>
+                  <p style="font-size:13px;font-weight:600;color:#C0323B;" id="biz-error-msg">조회 결과를 찾을 수 없습니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 연락처 -->
+            <div class="input-group" style="margin-bottom:0;">
+              <label class="input-label">연락처</label>
+              <div class="input-wrap">
+                <input class="input" type="tel" id="inp_tel" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this);validateField('tel')">
+                <span class="field-icon" id="icon_tel"></span>
+              </div>
+              <p class="field-msg" id="msg_tel"></p>
+            </div>
+          </div>
+
+          <!-- 이메일 -->
+          <div class="card" style="margin:0 0 12px;">
+            <div class="input-group" style="margin-bottom:0;">
+              <label class="input-label">이메일</label>
+              <div class="input-wrap">
+                <input class="input" type="email" id="inp_email" placeholder="example@company.com" oninput="validateField('email')">
+                <span class="field-icon" id="icon_email"></span>
+              </div>
+              <p class="field-msg" id="msg_email"></p>
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 16px 8px;">
+          <button class="btn btn-primary" id="btn-step1" onclick="goStep(2)" disabled>다음으로</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step2" class="animate" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+          <div onclick="goStep(1)" style="width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:26px;height:26px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:var(--text-primary);">식스티헤르츠</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--blue);">신청 접수</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border);gap:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">유형</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">기본</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">3</div>
+            <span style="font-size:12px;font-weight:700;color:var(--blue);">사업장</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">4</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">전력</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">5</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">확인</span>
+          </div>
+        </div>
+        <div style="padding:14px 16px 0;">
+          <p style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;padding-left:2px;">| 사업장 및 전력 정보</p>
+          <div class="card" style="margin:0 0 12px;">
+            <div class="input-group">
+              <label class="input-label">설치 주소</label>
+              <!-- 주소 검색 버튼 -->
+              <button type="button" onclick="openAddrSearch()" style="width:100%;height:52px;border:1.5px dashed var(--blue);border-radius:var(--radius-md);background:var(--blue-light);color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;" id="addr-search-btn">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                주소 검색
+              </button>
+              <!-- 선택된 주소 표시 -->
+              <div id="addr-display" style="display:none;margin-top:8px;">
+                <div style="padding:12px 14px;background:#fff;border:1.5px solid #00C896;border-radius:var(--radius-md);">
+                  <p style="font-size:13px;font-weight:700;color:var(--text-primary);" id="addr-road"></p>
+                  <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;" id="addr-jibun"></p>
+                </div>
+                <!-- 상세주소 입력 -->
+                <input class="input" type="text" id="inp_addr_detail" placeholder="상세 주소 입력 (동·호수 등)" style="margin-top:8px;" oninput="validateStep2()">
+              </div>
+              <!-- 숨겨진 실제 주소 값 -->
+              <input type="hidden" id="inp_addr" value="">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+              <label class="input-label">전력 용량 <span id="unit-badge" class="badge badge-blue">kW</span></label>
+              <div class="input-wrap">
+                <input class="input" type="number" id="inp_power" placeholder="0" style="padding-right:60px;" oninput="validateStep2()">
+                <span class="input-unit" id="power-unit">kW</span>
+              </div>
+              <p style="font-size:12px;color:var(--text-secondary);margin-top:6px;" id="power-hint">선택한 DR 유형의 최소 용량 이상 입력해주세요</p>
+            </div>
+          </div>
+          <div class="card" style="margin:0 0 12px;">
+            <p style="font-size:14px;font-weight:700;margin-bottom:12px;">계량기 보유 여부</p>
+            <div class="radio-group">
+              <div class="radio-item" id="meter_yes" onclick="selectMeter('yes')">
+                <div class="radio-dot"></div>
+                <div class="radio-text"><p class="radio-label">보유</p><p class="radio-desc">계량기를 보유하고 있습니다</p></div>
+              </div>
+              <div class="radio-item" id="meter_no" onclick="selectMeter('no')">
+                <div class="radio-dot"></div>
+                <div class="radio-text"><p class="radio-label">미보유</p><p class="radio-desc">계량기가 없습니다</p></div>
+              </div>
+            </div>
+            <div id="meter-warning" class="alert alert-warning" style="display:none;">
+              수요반응 사업은 계량기 보유자만 참여할 수 있습니다. 수요반응 사업 신청을 하시면 계량기 설치에 대해 구체적으로 안내드립니다.
+            </div>
+          </div>
+          <div class="card" style="margin:0 0 12px;">
+            <div class="input-group" style="margin-bottom:0;">
+              <label class="input-label">설비 유형</label>
+              <div class="select-wrap">
+                <select class="select" id="inp_facility" onchange="validateStep2()">
+                  <option value="">설비 유형을 선택하세요</option>
+                  <option value="lighting">조명설비</option>
+                  <option value="hvac">냉난방설비(HVAC)</option>
+                  <option value="motor">모터/펌프</option>
+                  <option value="industrial">산업용 설비</option>
+                  <option value="ess">에너지저장장치(ESS)</option>
+                  <option value="ev">전기차 충전기</option>
+                  <option value="other">기타</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 16px 8px;">
+          <button class="btn btn-primary" id="btn-step2" onclick="goStep(3)" disabled>다음으로</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="step3" class="animate" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+          <div onclick="goStep(2)" style="width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:26px;height:26px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:var(--text-primary);">식스티헤르츠</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--blue);">신청 접수</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border);gap:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">유형</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">기본</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#C8DCF5;display:flex;align-items:center;justify-content:center;">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary);">사업장</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--blue);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">4</div>
+            <span style="font-size:12px;font-weight:700;color:var(--blue);">전력</span>
+          </div>
+          <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-tertiary);">5</div>
+            <span style="font-size:12px;color:var(--text-tertiary);">확인</span>
+          </div>
+        </div>
+        <div style="padding:14px 16px 0;">
+          <div class="card" style="margin:0 0 12px;">
+            <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:14px;">DR 유형</p>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="badge badge-blue" id="conf-dr-badge"></span>
+              <span style="font-size:15px;font-weight:700;" id="conf-dr-name"></span>
+            </div>
+          </div>
+          <div class="card" style="margin:0 0 12px;">
+            <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:14px;">신청자 정보</p>
+            <div class="list-item"><span class="list-label">사업자명</span><span class="list-value" id="conf-name"></span></div>
+            <div class="list-item"><span class="list-label">사업자등록번호</span><span class="list-value" id="conf-biz"></span></div>
+            <div class="list-item"><span class="list-label">연락처</span><span class="list-value" id="conf-tel"></span></div>
+            <div class="list-item" style="border-bottom:none;"><span class="list-label">이메일</span><span class="list-value" id="conf-email"></span></div>
+          </div>
+          <div class="card" style="margin:0 0 12px;">
+            <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:14px;">설비 정보</p>
+            <div class="list-item"><span class="list-label">설치 주소</span><span class="list-value" id="conf-addr" style="font-size:12px;max-width:60%;text-align:right;"></span></div>
+            <div class="list-item"><span class="list-label">전력 용량</span><span class="list-value" id="conf-power"></span></div>
+            <div class="list-item"><span class="list-label">계량기 보유</span><span class="list-value" id="conf-meter"></span></div>
+            <div class="list-item" style="border-bottom:none;"><span class="list-label">설비 유형</span><span class="list-value" id="conf-facility"></span></div>
+          </div>
+          <div class="card" style="margin:0 0 12px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+              <div id="agree-check" onclick="toggleAgree()" style="width:22px;height:22px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:1px;transition:all .15s;"></div>
+              <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">개인정보 수집 및 이용에 동의합니다. 수집된 정보는 DR 사업 신청 처리에만 사용됩니다.</p>
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 16px 8px;">
+          <button class="btn btn-primary" id="btn-submit" onclick="submitApply()" disabled>신청 완료하기</button>
+        </div>
+      </div>
+
+      <!-- 완료 (showStep용 placeholder - 실제 표시는 screen-done) -->
+      <div id="step-done" class="animate" style="display:none;"></div>
+    </div>
+
+    <!-- ════════ 신청 완료 독립 화면 ════════ -->
+    <div class="screen" id="screen-done">
+      <!-- 상단 헤더 -->
+      <div style="background:var(--blue);padding:40px 24px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;overflow:hidden;">
+        <!-- 배경 원형 장식 -->
+        <div style="position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.07);top:-60px;right:-40px;"></div>
+        <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.07);bottom:-30px;left:-20px;"></div>
+        <!-- 완료 아이콘 -->
+        <div style="position:relative;margin-bottom:20px;z-index:1;">
+          <div style="width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;">
+            <div style="width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;">
+              <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <!-- 작은 뱃지 -->
+          <div style="position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--success);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;">
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <h2 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;z-index:1;">신청이 완료되었습니다!</h2>
+        <p style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.65;z-index:1;">접수가 정상적으로 처리되었습니다.<br>담당자 배정 후 안내드릴게요.</p>
+        <!-- 접수번호 칩 -->
+        <div style="margin-top:18px;background:rgba(255,255,255,.18);border-radius:24px;padding:8px 20px;display:flex;align-items:center;gap:8px;z-index:1;">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span style="font-size:13px;color:#fff;font-weight:700;">접수번호 <span id="done-ref-num" style="letter-spacing:.5px;">DR-2025-0000</span></span>
+        </div>
+      </div>
+
+      <!-- 바디 -->
+      <div style="flex:1;overflow-y:auto;padding:16px 16px 24px;">
+
+        <!-- 진행 절차 -->
+        <div style="background:#fff;border-radius:var(--radius-lg);padding:20px;border:1px solid var(--border);margin-bottom:12px;">
+          <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:16px;">📋 앞으로의 진행 절차</p>
+          <div style="display:flex;flex-direction:column;">
+
+            <div style="display:flex;gap:14px;padding-bottom:18px;position:relative;">
+              <div style="position:absolute;left:13px;top:27px;bottom:0;width:2px;background:var(--border);"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div style="padding-top:4px;">
+                <p style="font-size:14px;font-weight:700;color:var(--text-primary);">신청 접수 완료</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">방금 전 · 접수번호 발급</p>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;padding-bottom:18px;position:relative;">
+              <div style="position:absolute;left:13px;top:27px;bottom:0;width:2px;background:var(--border);"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-light);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+                <span style="font-size:11px;font-weight:800;color:var(--blue);">2</span>
+              </div>
+              <div style="padding-top:4px;">
+                <p style="font-size:14px;font-weight:700;color:var(--blue);">담당자 배정 및 연락</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">신청 후 <b>2~3 영업일 이내</b></p>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;padding-bottom:18px;position:relative;">
+              <div style="position:absolute;left:13px;top:27px;bottom:0;width:2px;background:var(--border);"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+                <span style="font-size:11px;font-weight:700;color:var(--text-tertiary);">3</span>
+              </div>
+              <div style="padding-top:4px;">
+                <p style="font-size:14px;font-weight:700;color:var(--text-tertiary);">서류 검토 및 현장 확인</p>
+                <p style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">담당자 안내에 따라 진행</p>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:11px;font-weight:700;color:var(--text-tertiary);">4</span>
+              </div>
+              <div style="padding-top:4px;">
+                <p style="font-size:14px;font-weight:700;color:var(--text-tertiary);">DR 사업 참여 시작</p>
+                <p style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">계약 체결 후 인센티브 정산 개시</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 안내 박스 -->
+        <div style="background:#FFF8E7;border-radius:var(--radius-lg);padding:16px 18px;border:1px solid #FFE4A0;margin-bottom:16px;">
+          <p style="font-size:13px;font-weight:700;color:#BF6900;margin-bottom:10px;">💡 꼭 확인해주세요</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <span style="font-size:13px;color:#BF6900;flex-shrink:0;margin-top:1px;">•</span>
+              <p style="font-size:13px;color:#7A4500;line-height:1.6;">등록하신 연락처·이메일로 담당자가 연락드립니다. 모르는 번호도 꼭 받아주세요.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <span style="font-size:13px;color:#BF6900;flex-shrink:0;margin-top:1px;">•</span>
+              <p style="font-size:13px;color:#7A4500;line-height:1.6;">진행 현황은 <strong>마이페이지</strong>에서 언제든지 확인하실 수 있습니다.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <span style="font-size:13px;color:#BF6900;flex-shrink:0;margin-top:1px;">•</span>
+              <p style="font-size:13px;color:#7A4500;line-height:1.6;">문의사항은 마이페이지 내 고객센터를 이용해주세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="btn btn-primary" style="height:54px;font-size:16px;" onclick="showScreen('screen-mypage');setNav('nav-mypage')">
+            마이페이지에서 현황 확인
+          </button>
+          <button class="btn btn-ghost" style="height:48px;" onclick="showScreen('screen-home');setNav('nav-home')">홈으로 돌아가기</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════ 신청 현황 ════════ -->
+    <div class="screen" id="screen-status">
+      <div class="header" style="position:relative;">
+        <div class="header-back" onclick="showScreen('screen-home')">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <span class="header-title">신청 현황</span>
+        <div class="header-right"></div>
+      </div>
+      <div style="padding:16px;">
+        <div class="card animate" style="margin:0 0 12px;border-left:4px solid var(--blue);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div>
+              <span class="badge badge-blue" style="margin-bottom:6px;" id="status-dr-type">표준 DR</span>
+              <p style="font-size:16px;font-weight:700;" id="status-dr-name">표준 DR 신청</p>
+            </div>
+            <span class="badge badge-orange">검토 중</span>
+          </div>
+          <div class="list-item" style="padding:10px 0;"><span class="list-label">접수번호</span><span class="list-value status-ref-num">DR-2025-001235</span></div>
+          <div class="list-item" style="padding:10px 0;border-bottom:none;"><span class="list-label">신청 전력용량</span><span class="list-value" style="color:var(--blue);" id="status-power">-</span></div>
+        </div>
+        <div class="card animate animate-d1" style="margin:0 0 12px;">
+          <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:16px;">처리 진행 상태</p>
+          <div class="status-timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="timeline-content">
+                <p class="timeline-title">신청 접수 완료</p>
+                <p class="timeline-date">2024.12.15 14:32</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot active">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="2.5"><circle cx="12" cy="12" r="4" fill="var(--blue)"/></svg>
+              </div>
+              <div class="timeline-content">
+                <p class="timeline-title" style="color:var(--blue);">서류 검토 진행 중</p>
+                <p class="timeline-date">예상: 2024.12.20 이내</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pending">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>
+              </div>
+              <div class="timeline-content">
+                <p class="timeline-title" style="color:var(--text-tertiary);">현장 실사</p>
+                <p class="timeline-date" style="color:var(--text-tertiary);">대기 중</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pending">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--text-tertiary)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="timeline-content">
+                <p class="timeline-title" style="color:var(--text-tertiary);">최종 승인 및 계약</p>
+                <p class="timeline-date" style="color:var(--text-tertiary);">대기 중</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info animate animate-d2">
+          서류 검토 중 추가 서류가 필요한 경우 등록하신 이메일 또는 연락처로 안내드립니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ DR 유형 안내 ════════ -->
+    <div class="screen" id="screen-info">
+      <div class="header" style="position:relative;">
+        <div class="header-back" onclick="showScreen('screen-home')">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <span class="header-title">DR 유형 안내</span>
+        <div class="header-right"></div>
+      </div>
+      <div class="info-section animate">
+        <h2 class="info-title">수요반응(DR) 사업이란?</h2>
+        <p class="info-desc">전력 수요가 많을 때 자발적으로 전기 사용을 줄이고, 그 대가로 인센티브를 받는 사업입니다.</p>
+        <div class="info-card animate animate-d1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="dr-tag dr-type-a" style="margin:0;">표준형</span>
+            <p class="info-card-title" style="margin:0;">표준형 DR</p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <span class="badge badge-blue">용량 단위: kW</span>
+            <span class="badge badge-gray">최소 100 kW</span>
+          </div>
+          <p class="info-card-desc">일반 사업장을 대상으로 하는 기본 DR 프로그램입니다. 월별 정산 인센티브가 지급되며, 사전 예고를 통해 감축 시간을 조율할 수 있습니다.</p>
+        </div>
+        <div class="info-card animate animate-d2">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="dr-tag dr-type-b" style="margin:0;">국민 DR</span>
+            <p class="info-card-title" style="margin:0;">국민 DR</p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <span class="badge badge-green">용량 단위: kWh</span>
+            <span class="badge badge-gray">최소 10 kWh</span>
+          </div>
+          <p class="info-card-desc">소규모 사업장과 일반 가정을 대상으로 하는 프로그램입니다. 진입 장벽이 낮아 누구나 쉽게 참여할 수 있으며, 에너지량(kWh) 기준으로 정산합니다.</p>
+        </div>
+        <div class="info-card animate animate-d3">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="dr-tag dr-type-c" style="margin:0;">특별 DR</span>
+            <p class="info-card-title" style="margin:0;">특별 DR</p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <span class="badge badge-orange">용량 단위: MW</span>
+            <span class="badge badge-gray">최소 1 MW</span>
+          </div>
+          <p class="info-card-desc">대용량 산업체를 대상으로 하는 고인센티브 프로그램입니다. 자동제어장치 설치가 필요하며, 전력용량(MW) 기준으로 참여 자격이 결정됩니다.</p>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="goApply()">지금 신청하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ 마이페이지 ════════ -->
+    <div class="screen" id="screen-mypage">
+      <div class="profile-header animate">
+        <div class="profile-avatar">홍</div>
+        <p class="profile-name">홍길동</p>
+        <p class="profile-status">표준형 DR 신청 중 · 검토 단계</p>
+      </div>
+      <div style="padding:16px 16px 8px;">
+        <div class="card animate animate-d1" style="margin:0 0 12px;">
+          <p style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:14px;">내 신청 현황</p>
+          <div class="list-item"><span class="list-label">신청 유형</span><span class="list-value"><span class="badge badge-blue">표준형</span></span></div>
+          <div class="list-item"><span class="list-label">접수번호</span><span class="list-value">DR-2024-001234</span></div>
+          <div class="list-item"><span class="list-label">신청 전력</span><span class="list-value" style="color:var(--blue);">500 kW</span></div>
+          <div class="list-item" style="border-bottom:none;"><span class="list-label">상태</span><span class="badge badge-orange">검토 중</span></div>
+        </div>
+      </div>
+      <div style="padding:0 16px 8px;">
+        <p class="section-title" style="padding:0;">계정 관리</p>
+        <div class="menu-list animate animate-d2">
+          <div class="menu-item" onclick="openModal('modal-profile')">
+            <div class="menu-icon" style="background:#E8F1FF;">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#0064FF" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="menu-text">내 정보 수정</span>
+            <svg class="menu-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="menu-item" onclick="openModal('modal-notify')">
+            <div class="menu-icon" style="background:#E6FAF4;">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#00885A" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </div>
+            <span class="menu-text">알림 설정</span>
+            <svg class="menu-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="menu-item" onclick="openModal('modal-doc')">
+            <div class="menu-icon" style="background:#FFF3E0;">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#BF6900" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="menu-text">서류 관리</span>
+            <svg class="menu-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="menu-item">
+            <div class="menu-icon" style="background:#F0EEFF;">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#6B4EFF" stroke-width="2"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="menu-text">고객센터</span>
+            <svg class="menu-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- ════════ 바텀 탭 ════════ -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showScreen('screen-home');setNav('nav-home')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>홈</span>
+    </div>
+    <div class="nav-item" id="nav-apply" onclick="goApply();setNav('nav-apply')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span>신청</span>
+    </div>
+    <div class="nav-item" id="nav-mypage" onclick="showScreen('screen-mypage');setNav('nav-mypage')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>마이</span>
+    </div>
+  </nav>
+
+  <!-- ════════ 모달들 ════════ -->
+  <div class="modal-overlay" id="modal-profile">
+    <div class="modal">
+      <div class="modal-handle" onclick="closeModal('modal-profile')"></div>
+      <h3 class="modal-title">내 정보 수정</h3>
+      <div class="input-group">
+        <label class="input-label">이름</label>
+        <input class="input" type="text" value="홍길동">
+      </div>
+      <div class="input-group">
+        <label class="input-label">연락처</label>
+        <input class="input" type="tel" value="010-1234-5678">
+      </div>
+      <div class="input-group" style="margin-bottom:20px;">
+        <label class="input-label">이메일</label>
+        <input class="input" type="email" value="hong@example.com">
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('modal-profile')">저장하기</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-notify">
+    <div class="modal">
+      <div class="modal-handle" onclick="closeModal('modal-notify')"></div>
+      <h3 class="modal-title">알림 설정</h3>
+      <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
+          <span style="font-size:15px;font-weight:500;">신청 현황 알림</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('modal-notify')">저장하기</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-doc">
+    <div class="modal">
+      <div class="modal-handle" onclick="closeModal('modal-doc')"></div>
+      <h3 class="modal-title">서류 관리</h3>
+      <p class="modal-sub">신청에 필요한 서류를 관리합니다</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-radius:var(--radius-md);">
+          <div><p style="font-size:14px;font-weight:600;">사업자등록증</p><p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">제출 완료</p></div>
+          <span class="badge badge-green">완료</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-radius:var(--radius-md);">
+          <div><p style="font-size:14px;font-weight:600;">전기안전관리 확인서</p><p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">미제출</p></div>
+          <span class="badge badge-orange">대기</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-radius:var(--radius-md);">
+          <div><p style="font-size:14px;font-weight:600;">전력사용확인서</p><p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">미제출</p></div>
+          <span class="badge badge-orange">대기</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('modal-doc')">확인</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+var state={drType:null,meterHas:null,agreed:false,applied:false,refNum:''};
+var drConfig={
+  'DR-A':{unit:'kW',minVal:3,badge:'badge-blue',name:'국민 DR',hint:'국민 DR: 3kW 이상 입력',info:'소규모 전국민 대상 DR 프로그램입니다.'},
+  'DR-B':{unit:'kW',minVal:100,badge:'badge-blue',name:'표준 DR',hint:'표준 DR: 최소 100 kW 이상 입력',info:'일반 사업자 대상 표준 DR 프로그램입니다.'},
+  'DR-C':{unit:'kW',minVal:10,badge:'badge-green',name:'중소형 DR',hint:'중소형 DR: 10~100 kW 입력',info:'중소기업·소상공인 대상 DR 프로그램입니다.'},
+  'DR-D':{unit:'kW',minVal:50,badge:'badge-green',name:'제주 DR',hint:'제주 DR: 최소 50 kW 이상 입력',info:'제주도 소재 사업장 대상 DR 프로그램입니다.'},
+  'DR-E':{unit:'kW',minVal:500,badge:'badge-orange',name:'주파수 DR',hint:'주파수 DR: 최소 500 kW 이상 입력',info:'자동 응동형 대용량 DR 프로그램입니다.'},
+  'DR-F':{unit:'kW',minVal:200,badge:'badge-orange',name:'플러스 DR',hint:'플러스 DR: 최소 200 kW 이상 입력',info:'표준DR 1년 이상 고성과 참여자 대상 프로그램입니다.'}
+};
+var facilityLabels={'lighting':'조명설비','hvac':'냉난방설비(HVAC)','motor':'모터/펌프','industrial':'산업용 설비','ess':'에너지저장장치(ESS)','ev':'전기차 충전기','other':'기타'};
+var allDrIds=['drc_a','drc_b','drc_c','drc_d','drc_e','drc_f'];
+
+const API_URL='https://script.google.com/macros/s/AKfycbz4W7tSb2VfE5j3__Kzy-XpSSIuTiQWs8SwGA27kziKdzIGzACgvZiWL_ppRs8eQxPp/exec';
+
+function collectApplicationData(){
+  var cfg=drConfig[state.drType]||{name:'',unit:''};
+  var facilityValue=document.getElementById('inp_facility')?.value||'';
+  var addrBase=document.getElementById('inp_addr')?.value.trim()||'';
+  var addrDetail=document.getElementById('inp_addr_detail')?.value.trim()||'';
+
+  return {
+    drType: state.drType||'',
+    drTypeName: cfg.name||'',
+    applicantName: document.getElementById('inp_name')?.value.trim()||'',
+    bizNo: document.getElementById('inp_biz')?.value.trim()||'',
+    phone: document.getElementById('inp_tel')?.value.trim()||'',
+    email: document.getElementById('inp_email')?.value.trim()||'',
+    address: addrBase,
+    addressDetail: addrDetail,
+    powerValue: document.getElementById('inp_power')?.value||'',
+    powerUnit: cfg.unit||document.getElementById('power-unit')?.textContent||'kW',
+    meterOwned: state.meterHas==='yes'?'보유':'미보유',
+    facilityType: facilityValue,
+    facilityTypeName: facilityLabels[facilityValue]||''
+  };
+}
+
+function renderDoneRefNum(refNum){
+  var rn=document.getElementById('done-ref-num');
+  if(rn) rn.textContent=refNum;
+}
+
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el) el.classList.add('active');
+  var mc=document.getElementById('mainContent');
+  if(mc) mc.scrollTop=0;
+  var navMap={'screen-home':'nav-home','screen-apply':'nav-apply','screen-mypage':'nav-mypage','screen-done':'nav-apply'};
+  if(navMap[id]) setNav(navMap[id]);
+}
+
+function setNav(id){
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el) el.classList.add('active');
+}
+
+function goApply(){
+  if(state.applied){
+    /* 신청 완료 상태 → 신청현황 화면으로 */
+    showScreen('screen-status');
+    setNav('nav-apply');
+    return;
+  }
+  showScreen('screen-apply');
+  showStep(0);
+  setNav('nav-apply');
+}
+
+function showStep(n){
+  [0,1,2,3,'done'].forEach(function(i){
+    var el=document.getElementById('step'+i);
+    if(el){el.style.display='none';}
+  });
+  var target=document.getElementById('step'+n);
+  if(target){
+    target.style.display='';
+    target.classList.remove('animate');
+    void target.offsetWidth;
+    target.classList.add('animate');
+  }
+}
+
+function selectDR(type){
+  state.drType=type;
+  var typeToId={'DR-A':'drc_a','DR-B':'drc_b','DR-C':'drc_c','DR-D':'drc_d','DR-E':'drc_e','DR-F':'drc_f'};
+  allDrIds.forEach(function(cid){
+    var card=document.getElementById(cid);
+    if(!card) return;
+    card.style.borderColor='var(--border)';
+    card.style.background='#fff';
+    var chk=card.querySelector('.dr-check');
+    if(chk){chk.style.borderColor='var(--border)';chk.style.background='';chk.innerHTML='';}
+  });
+  var selId=typeToId[type];
+  if(selId){
+    var selCard=document.getElementById(selId);
+    if(selCard){
+      selCard.style.borderColor='var(--blue)';
+      selCard.style.background='var(--blue-light)';
+      var chk=selCard.querySelector('.dr-check');
+      if(chk){
+        chk.style.borderColor='var(--blue)';
+        chk.style.background='var(--blue)';
+        chk.innerHTML='<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      }
+    }
+  }
+  var cfg=drConfig[type];
+  var box=document.getElementById('dr-info-box');
+  if(box && cfg){box.style.display='';box.textContent=cfg.name+' 선택됨: '+cfg.info;}
+  var btn=document.getElementById('btn-step0');
+  if(btn) btn.disabled=false;
+}
+
+function goStep(n){
+  if(n===1){
+    if(!state.drType){alert('DR 유형을 선택해주세요.');return;}
+    var cfg=drConfig[state.drType];
+    var pu=document.getElementById('power-unit');
+    if(pu) pu.textContent=cfg.unit;
+    var ph=document.getElementById('power-hint');
+    if(ph) ph.textContent=cfg.hint;
+    var ub=document.getElementById('unit-badge');
+    if(ub){ub.className='badge '+cfg.badge;ub.textContent=cfg.unit;}
+    showStep(1);
+  } else if(n===2){
+    showStep(2);
+  } else if(n===3){
+    fillConfirm();
+    showStep(3);
+  } else {
+    showStep(n);
+  }
+}
+
+/* ── 필드별 실시간 검증 ── */
+var fieldState={name:false,biz:false,bizChecked:false,tel:false,email:false};
+
+function setField(id,ok,msg){
+  var input=document.getElementById('inp_'+id);
+  var icon=document.getElementById('icon_'+id);
+  var msgEl=document.getElementById('msg_'+id);
+  if(!input) return;
+  input.classList.remove('valid','invalid');
+  if(input.value.trim()===''){
+    if(icon) icon.innerHTML='';
+    if(msgEl){msgEl.textContent='';msgEl.className='field-msg';}
+    return;
+  }
+  if(ok){
+    input.classList.add('valid');
+    if(icon) icon.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#00C896" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    if(msgEl){msgEl.textContent=msg||'';msgEl.className='field-msg ok';}
+  } else {
+    input.classList.add('invalid');
+    if(icon) icon.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F04452" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    if(msgEl){msgEl.textContent=msg||'';msgEl.className='field-msg err';}
+  }
+}
+
+function validateField(id){
+  var input=document.getElementById('inp_'+id);
+  if(!input) return;
+  var v=input.value.trim();
+  if(id==='name'){
+    var ok=v.length>=2;
+    fieldState.name=ok;
+    setField('name',ok,ok?'':'2자 이상 입력해주세요');
+  } else if(id==='biz'){
+    var digits=v.replace(/\D/g,'');
+    var fmtOk=digits.length===10;
+    var chkOk=fmtOk&&bizChecksum(digits);
+    /* 번호 바뀌면 조회 상태 리셋 */
+    fieldState.bizChecked=false;
+    fieldState.biz=false;
+    document.getElementById('biz-result').style.display='none';
+    document.getElementById('biz-error').style.display='none';
+    var btn=document.getElementById('btn-biz-check');
+    if(btn) btn.disabled=!fmtOk;
+    if(v===''){setField('biz',false,'');return;}
+    if(!fmtOk){setField('biz',false,'10자리 숫자로 입력해주세요');return;}
+    if(!chkOk){setField('biz',false,'유효하지 않은 사업자등록번호입니다');return;}
+    setField('biz',false,'번호 형식 확인 · 조회 버튼을 눌러 검증해주세요');
+    var msgEl=document.getElementById('msg_biz');
+    if(msgEl) msgEl.className='field-msg';
+    var icon=document.getElementById('icon_biz');
+    if(icon) icon.innerHTML='';
+    input.classList.remove('valid','invalid');
+  } else if(id==='tel'){
+    var digits2=v.replace(/\D/g,'');
+    var ok2=digits2.length===11&&(digits2.startsWith('010')||digits2.startsWith('011'));
+    fieldState.tel=ok2;
+    setField('tel',ok2,ok2?'':'유효한 휴대폰 번호를 입력해주세요');
+  } else if(id==='email'){
+    var ok3=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    fieldState.email=ok3;
+    setField('email',ok3,ok3?'':'올바른 이메일 형식이 아닙니다');
+  }
+  validateStep1();
+}
+
+/* 사업자등록번호 체크섬 검증 */
+function bizChecksum(d){
+  var w=[1,3,7,1,3,7,1,3,5];
+  var s=0;
+  for(var i=0;i<9;i++) s+=w[i]*parseInt(d[i]);
+  s+=Math.floor((5*parseInt(d[8]))/10);
+  return (10-(s%10))%10===parseInt(d[9]);
+}
+
+/* 사업자등록번호 조회 (mock) */
+var bizDb={
+  '1234567890':{name:'㈜한국에너지',status:'사업자등록 중 · 과세'},
+  '2345678901':{name:'홍길동',status:'사업자등록 중 · 면세'},
+  '1111111111':{name:'',status:'폐업'},
+};
+function checkBizNum(){
+  var input=document.getElementById('inp_biz');
+  var btn=document.getElementById('btn-biz-check');
+  var resultBox=document.getElementById('biz-result');
+  var errorBox=document.getElementById('biz-error');
+  var errorMsg=document.getElementById('biz-error-msg');
+  if(!input||!btn) return;
+  var digits=input.value.replace(/\D/g,'');
+  if(digits.length!==10) return;
+  /* 조회 중 상태 */
+  btn.disabled=true;
+  btn.textContent='조회 중…';
+  btn.style.background='var(--text-secondary)';
+  resultBox.style.display='none';
+  errorBox.style.display='none';
+  setTimeout(function(){
+    btn.textContent='조회';
+    btn.style.background='var(--blue)';
+    var found=bizDb[digits];
+    if(found && found.status.indexOf('폐업')===-1){
+      /* 조회 성공 */
+      document.getElementById('biz-result-name').textContent=found.name;
+      document.getElementById('biz-result-status').textContent=found.status;
+      resultBox.style.display='';
+      errorBox.style.display='none';
+      fieldState.biz=true;
+      fieldState.bizChecked=true;
+      input.classList.remove('invalid');
+      input.classList.add('valid');
+      var icon=document.getElementById('icon_biz');
+      if(icon) icon.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#00C896" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+      var msgEl=document.getElementById('msg_biz');
+      if(msgEl){msgEl.textContent='조회 완료';msgEl.className='field-msg ok';}
+    } else if(found && found.status.indexOf('폐업')!==-1){
+      /* 폐업 */
+      errorMsg.textContent='폐업한 사업자입니다. 참여가 불가합니다.';
+      errorBox.style.display='';
+      resultBox.style.display='none';
+      fieldState.biz=false;
+      input.classList.add('invalid');
+      btn.disabled=false;
+    } else {
+      /* 없음: 테스트용 — 미등록 번호는 일단 통과 처리 (실서버 연동 전) */
+      document.getElementById('biz-result-name').textContent='(미등록 조회 — 실서버 연동 후 정확한 결과 제공)';
+      document.getElementById('biz-result-status').textContent='테스트 모드: 정보를 찾을 수 없으나 진행 허용';
+      resultBox.style.display='';
+      fieldState.biz=true;
+      fieldState.bizChecked=true;
+      input.classList.add('valid');
+      var icon2=document.getElementById('icon_biz');
+      if(icon2) icon2.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#00C896" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
+    btn.disabled=false;
+    validateStep1();
+  },1200);
+}
+
+function validateStep1(){
+  var btn=document.getElementById('btn-step1');
+  if(!btn) return;
+  var ok=fieldState.name&&fieldState.biz&&fieldState.tel&&fieldState.email;
+  btn.disabled=!ok;
+}
+
+function validateStep2(){
+  var addr=document.getElementById('inp_addr');
+  var power=document.getElementById('inp_power');
+  var facility=document.getElementById('inp_facility');
+  var btn=document.getElementById('btn-step2');
+  if(!addr||!power||!facility||!btn) return;
+  var cfg=drConfig[state.drType]||{minVal:0};
+  var p=parseFloat(power.value);
+  var addrOk=addr.value.trim().length>0;
+  var ok=addrOk&&!isNaN(p)&&p>=cfg.minVal&&facility.value&&state.meterHas==='yes';
+  btn.disabled=!ok;
+}
+
+function selectMeter(val){
+  state.meterHas=val;
+  var my=document.getElementById('meter_yes');
+  var mn=document.getElementById('meter_no');
+  var mw=document.getElementById('meter-warning');
+  if(my) my.classList.toggle('selected',val==='yes');
+  if(mn) mn.classList.toggle('selected',val==='no');
+  if(mw) mw.style.display=val==='no'?'':'none';
+  validateStep2();
+}
+
+function fillConfirm(){
+  var cfg=drConfig[state.drType]||{badge:'badge-blue',name:'',unit:''};
+  var badge=document.getElementById('conf-dr-badge');
+  var name=document.getElementById('conf-dr-name');
+  if(badge){badge.className='badge '+cfg.badge;badge.textContent=cfg.name;}
+  if(name) name.textContent=cfg.name;
+  var fields=[
+    ['conf-name','inp_name'],['conf-biz','inp_biz'],
+    ['conf-tel','inp_tel'],['conf-email','inp_email']
+  ];
+  fields.forEach(function(f){
+    var t=document.getElementById(f[0]);
+    var s=document.getElementById(f[1]);
+    if(t&&s) t.textContent=s.value;
+  });
+  /* 주소: 기본주소 + 상세주소 합치기 */
+  var addrBase=document.getElementById('inp_addr');
+  var addrDetail=document.getElementById('inp_addr_detail');
+  var confAddr=document.getElementById('conf-addr');
+  if(confAddr){
+    var full=(addrBase?addrBase.value:'')+(addrDetail&&addrDetail.value?' '+addrDetail.value:'');
+    confAddr.textContent=full;
+  }
+  var pw=document.getElementById('conf-power');
+  var pi=document.getElementById('inp_power');
+  if(pw&&pi) pw.textContent=pi.value+' '+cfg.unit;
+  var cm=document.getElementById('conf-meter');
+  if(cm) cm.textContent=state.meterHas==='yes'?'보유':'미보유';
+  var fi=document.getElementById('inp_facility');
+  var cf=document.getElementById('conf-facility');
+  if(fi&&cf) cf.textContent=facilityLabels[fi.value]||fi.value;
+}
+
+function toggleAgree(){
+  state.agreed=!state.agreed;
+  var box=document.getElementById('agree-check');
+  var btn=document.getElementById('btn-submit');
+  if(box){
+    if(state.agreed){
+      box.style.background='var(--blue)';box.style.borderColor='var(--blue)';
+      box.innerHTML='<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else {
+      box.style.background='';box.style.borderColor='var(--border)';box.innerHTML='';
+    }
+  }
+  if(btn) btn.disabled=!state.agreed;
+}
+
+async function submitApply(){
+  var btn=document.getElementById('btn-submit');
+  var originalText=btn?btn.textContent:'';
+
+  try{
+    var payload=collectApplicationData();
+
+    if(!payload.drType){
+      alert('DR 유형을 선택해주세요.');
+      return;
+    }
+    if(!payload.applicantName||!payload.bizNo||!payload.phone){
+      alert('필수값을 입력해주세요.');
+      return;
+    }
+
+    if(btn){
+      btn.disabled=true;
+      btn.textContent='접수 중...';
+    }
+
+    var res=await fetch(API_URL,{
+      method:'POST',
+      headers:{
+        'Content-Type':'text/plain;charset=utf-8'
+      },
+      body:JSON.stringify(payload)
+    });
+
+    var result=await res.json();
+
+    if(!result.ok){
+      throw new Error(result.message||'접수 처리 중 오류가 발생했습니다.');
+    }
+
+    state.refNum=result.refNum||'-';
+    state.applied=true;
+
+    renderDoneRefNum(state.refNum);
+
+    var navApply=document.getElementById('nav-apply');
+    if(navApply){
+      var existing=navApply.querySelector('.nav-badge');
+      if(!existing){
+        var badge=document.createElement('div');
+        badge.className='nav-badge';
+        badge.style.cssText='position:absolute;top:6px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:#F04452;border:2px solid #fff;';
+        navApply.style.position='relative';
+        navApply.appendChild(badge);
+      }
+    }
+
+    var refEls=document.querySelectorAll('.status-ref-num');
+    refEls.forEach(function(el){el.textContent=state.refNum;});
+    var cfg=drConfig[state.drType]||{name:''};
+    var statusType=document.getElementById('status-dr-type');
+    var statusName=document.getElementById('status-dr-name');
+    if(statusType) statusType.textContent=cfg.name;
+    if(statusName) statusName.textContent=cfg.name+' DR 신청';
+    var statusPower=document.getElementById('status-power');
+    var pi=document.getElementById('inp_power');
+    var pu=document.getElementById('power-unit');
+    if(statusPower&&pi&&pu) statusPower.textContent=pi.value+' '+pu.textContent;
+
+    showStep('done');
+    showScreen('screen-done');
+    setNav('nav-apply');
+  }catch(err){
+    console.error(err);
+    alert(err.message||'신청 중 오류가 발생했습니다.');
+  }finally{
+    if(btn){
+      btn.disabled=!state.agreed;
+      btn.textContent=originalText||'신청 완료하기';
+    }
+  }
+}
+
+function openModal(id){var el=document.getElementById(id);if(el)el.classList.add('show');}
+function closeModal(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+
+function formatBizNum(el){
+  var v=el.value.replace(/\D/g,'');
+  if(v.length>5) v=v.slice(0,3)+'-'+v.slice(3,5)+'-'+v.slice(5,10);
+  else if(v.length>3) v=v.slice(0,3)+'-'+v.slice(3);
+  el.value=v;
+}
+function formatPhone(el){
+  var v=el.value.replace(/\D/g,'');
+  if(v.length>7) v=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+  else if(v.length>3) v=v.slice(0,3)+'-'+v.slice(3);
+  el.value=v;
+}
+
+document.querySelectorAll('.modal-overlay').forEach(function(overlay){
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('show');});
+});
+
+/* ── 주소 검색 (Daum 우편번호) ── */
+function openAddrSearch(){
+  if(typeof daum==='undefined'||!daum.Postcode){
+    /* API 미로드 시 fallback mock */
+    mockAddrSearch();
+    return;
+  }
+  new daum.Postcode({
+    oncomplete:function(data){
+      var road=data.roadAddress;
+      var jibun=data.jibunAddress||data.autoJibunAddress;
+      applyAddr(road,jibun);
+    }
+  }).open();
+}
+
+/* 테스트용 mock (API 미로드 환경) */
+var mockAddresses=[
+  {road:'서울특별시 강남구 테헤란로 152',jibun:'서울특별시 강남구 역삼동 718-2'},
+  {road:'서울특별시 마포구 월드컵북로 396',jibun:'서울특별시 마포구 상암동 1652'},
+  {road:'경기도 성남시 분당구 판교역로 235',jibun:'경기도 성남시 분당구 삼평동 681'},
+  {road:'부산광역시 해운대구 센텀중앙로 79',jibun:'부산광역시 해운대구 우동 1467-6'},
+  {road:'인천광역시 연수구 송도국제대로 315',jibun:'인천광역시 연수구 송도동 11-1'},
+];
+function mockAddrSearch(){
+  /* 모달 형태 주소 선택 UI */
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  var box=document.createElement('div');
+  box.style.cssText='background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:8px 0 32px;';
+  var handle='<div style="width:40px;height:4px;background:#E5E8EB;border-radius:2px;margin:12px auto 16px;"></div>';
+  var title='<p style="font-size:16px;font-weight:700;padding:0 20px 12px;color:#191F28;border-bottom:1px solid #E5E8EB;">주소 선택 (테스트 모드)</p>';
+  var items=mockAddresses.map(function(a,i){
+    return '<div onclick="selectMockAddr('+i+')" style="padding:14px 20px;border-bottom:1px solid #F2F4F7;cursor:pointer;" onmouseover="this.style.background=\'#F2F4F7\'" onmouseout="this.style.background=\'#fff\'">'
+      +'<p style="font-size:14px;font-weight:600;color:#191F28;">'+a.road+'</p>'
+      +'<p style="font-size:12px;color:#6B7684;margin-top:3px;">'+a.jibun+'</p>'
+      +'</div>';
+  }).join('');
+  box.innerHTML=handle+title+items;
+  overlay.appendChild(box);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)document.body.removeChild(overlay);});
+  window._mockAddrOverlay=overlay;
+  window._mockAddresses=mockAddresses;
+  document.body.appendChild(overlay);
+}
+window.selectMockAddr=function(i){
+  var a=window._mockAddresses[i];
+  applyAddr(a.road,a.jibun);
+  if(window._mockAddrOverlay) document.body.removeChild(window._mockAddrOverlay);
+};
+
+function applyAddr(road,jibun){
+  var hidden=document.getElementById('inp_addr');
+  var display=document.getElementById('addr-display');
+  var roadEl=document.getElementById('addr-road');
+  var jibunEl=document.getElementById('addr-jibun');
+  var btn=document.getElementById('addr-search-btn');
+  if(hidden) hidden.value=road;
+  if(roadEl) roadEl.textContent=road;
+  if(jibunEl) jibunEl.textContent=jibun?'(지번) '+jibun:'';
+  if(display) display.style.display='';
+  if(btn){
+    btn.textContent='주소 재검색';
+    btn.style.borderStyle='solid';
+  }
+  validateStep2();
+}
+</script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</body>
+</html>
