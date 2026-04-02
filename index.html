@@ -1400,8 +1400,6 @@ async function submitApply(){
     email:document.getElementById('inp_email')?document.getElementById('inp_email').value.trim():'',
     address:addrBase,
     addressDetail:addrDetail,
-    powerValue:document.getElementById('inp_power')?document.getElementById('inp_power').value:'',
-    powerUnit:powerUnit,
     powerCapacity:(document.getElementById('inp_power')?document.getElementById('inp_power').value:'')+' '+powerUnit,
     meterOwned:state.meterHas==='yes'?'보유':'미보유',
     facilityType:facilityValue,
