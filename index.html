@@ -1296,11 +1296,22 @@ function validateStep2(){
   var facility=document.getElementById('inp_facility');
   var btn=document.getElementById('btn-step2');
   if(!addr||!power||!facility||!btn) return;
-  var cfg=drConfig[state.drType]||{minVal:0};
   var p=parseFloat(power.value);
   var addrOk=addr.value.trim().length>0;
-  var ok=addrOk&&!isNaN(p)&&p>=cfg.minVal&&facility.value&&state.meterHas==='yes';
+  var powerOk=!isNaN(p)&&p>0;
+  var ok=addrOk&&powerOk&&facility.value&&state.meterHas==='yes';
   btn.disabled=!ok;
+
+  /* 최소 용량 미달 시 힌트 경고 표시 (버튼은 막지 않음) */
+  var cfg=drConfig[state.drType]||{minVal:0};
+  var hint=document.getElementById('power-hint');
+  if(hint&&powerOk&&p<cfg.minVal){
+    hint.style.color='var(--danger)';
+    hint.textContent='⚠ 선택한 DR 유형 권장 최소 용량('+cfg.minVal+'kW) 미만입니다. 담당자 검토 후 안내드립니다.';
+  } else if(hint){
+    hint.style.color='var(--text-secondary)';
+    hint.textContent=cfg.hint||'선택한 DR 유형의 최소 용량 이상 입력해주세요';
+  }
 }
 
 function selectMeter(val){
