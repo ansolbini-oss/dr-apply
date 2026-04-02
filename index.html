@@ -1405,7 +1405,8 @@ async function submitApply(){
     powerCapacity:(document.getElementById('inp_power')?document.getElementById('inp_power').value:'')+' '+powerUnit,
     meterOwned:state.meterHas==='yes'?'보유':'미보유',
     facilityType:facilityValue,
-    facilityTypeName:facilityLabels[facilityValue]||''
+    facilityTypeName:facilityLabels[facilityValue]||'',
+    source:window.location.hostname
   };
 
   if(!state.drType){alert('DR 유형을 선택해주세요.');return;}
