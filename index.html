@@ -1393,7 +1393,6 @@ async function submitApply(){
   var payload={
     refNum:refNum,
     timestamp:timestamp,
-    drType:state.drType||'',
     drTypeName:cfg.name||'',
     applicantName:document.getElementById('inp_name')?document.getElementById('inp_name').value.trim():'',
     bizNo:document.getElementById('inp_biz')?document.getElementById('inp_biz').value.trim():'',
@@ -1403,6 +1402,7 @@ async function submitApply(){
     addressDetail:addrDetail,
     powerValue:document.getElementById('inp_power')?document.getElementById('inp_power').value:'',
     powerUnit:powerUnit,
+    powerCapacity:(document.getElementById('inp_power')?document.getElementById('inp_power').value:'')+' '+powerUnit,
     meterOwned:state.meterHas==='yes'?'보유':'미보유',
     facilityType:facilityValue,
     facilityTypeName:facilityLabels[facilityValue]||''
